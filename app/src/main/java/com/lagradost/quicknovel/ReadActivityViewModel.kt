@@ -920,7 +920,7 @@ class ReadActivityViewModel : APIRepository() {
             if (from.isBlank() || to.isBlank()) return false
             val all = TranslateLanguage.getAllLanguages()
             if (!all.contains(to)) return false
-            if (!all.contains(from) && !(agent != TranslatorAgents.OFFLINE && from == AUTO_LANG)) return false
+            if (!all.contains(from) && !(agent != String.OFFLINE && from == AUTO_LANG)) return false
             if (from == to) return false
             return true
         }
