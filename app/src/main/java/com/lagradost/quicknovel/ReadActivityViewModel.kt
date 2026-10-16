@@ -231,14 +231,15 @@ class ReadActivityViewModel : APIRepository() {
             val textHash = hashString(
                 text.trim().toString().toByteArray()
             )
-            val filePrefix = "ml_${textHash}.${currentSettings.from}_to_${currentSettings.to}"
+            val agentSuffix = currentSettings.agent.title.ifEmpty { TranslatorAgents.OFFLINE.title }
+
+            val filePrefix = "ml_${textHash}.${currentSettings.from}_to_${currentSettings.to}.$agentSuffix"
 
             val cachedData = safe {
-                context?.filesDir?.let { rootDir ->
-                    val dir = File(rootDir, "translations")
+                context?.cacheDir?.let { dir ->
                     val cache = File(dir, "$filePrefix.txt")
                     if (cache.exists()) {
-                        Log.i(TAG, "Cache permanent exists for $filePrefix")
+                        Log.i(TAG, "Cache exists for $filePrefix")
                         val lines = cache.readLines()
                         val (builder, out) = getFinalTranslatedText(spans, lines)
                         return@safe builder to out
@@ -261,13 +262,11 @@ class ReadActivityViewModel : APIRepository() {
             val (builder, out) = getFinalTranslatedText(spans, translatedList)
 
             safe {
-                context?.filesDir?.let { rootDir ->
-                    val dir = File(rootDir, "translations")
-                    if (!dir.exists()) dir.mkdirs()
-                    val cache = File(dir, "$filePrefix.tmp")
+                context?.cacheDir?.let {
+                    val cache = File(it, "$filePrefix.tmp")
                     cache.writeText(builder.toString())
-                    safe { File(dir, "$filePrefix.txt").delete() }
-                    cache.renameTo(File(dir, "$filePrefix.txt"))
+                    safe { File(it, "$filePrefix.txt").delete() }
+                    cache.renameTo(File(it, "$filePrefix.txt"))
                 }
             }
 
@@ -878,16 +877,16 @@ class ReadActivityViewModel : APIRepository() {
         EPUB_ML_TO_LANGUAGE, TranslateLanguage.ENGLISH, String::class, mlToLanguageLive
     )
 
-    val mlTranslationAgentLive: MutableLiveData<String> = MutableLiveData(TranslatorAgents.ONLINE.name)
+    val mlTranslationAgentLive: MutableLiveData<String> = MutableLiveData(TranslatorAgents.OFFLINE.name)
     var mlTranslationAgent by PreferenceDelegateLiveView(
-        "ml_translation_agent", TranslatorAgents.ONLINE.name, String::class, mlTranslationAgentLive
+        "ml_translation_agent", TranslatorAgents.OFFLINE.name, String::class, mlTranslationAgentLive
     )
-    val currentAgent get() = try { TranslatorAgents.valueOf(mlTranslationAgent) } catch (e: Exception) { TranslatorAgents.ONLINE }
+    val currentAgent get() = try { TranslatorAgents.valueOf(mlTranslationAgent) } catch (e: Exception) { TranslatorAgents.OFFLINE }
 
     data class MLSettings(
         @JsonProperty("from") val from: String,
         @JsonProperty("to") val to: String,
-        @JsonProperty("agent") val agent: TranslatorAgents = TranslatorAgents.ONLINE
+        @JsonProperty("agent") val agent: TranslatorAgents = TranslatorAgents.OFFLINE
     ) {
         companion object {
             const val AUTO_LANG = "auto"
