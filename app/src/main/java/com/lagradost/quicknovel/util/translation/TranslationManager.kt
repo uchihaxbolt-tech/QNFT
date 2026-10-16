@@ -1,4 +1,4 @@
-package com.lagradost.quicknovel.util.translation
+﻿package com.lagradost.quicknovel.util.translation
 
 import com.google.android.gms.tasks.Tasks
 import com.google.mlkit.common.model.DownloadConditions
@@ -89,7 +89,7 @@ class TranslationManager {
 
         return when (agent) {
             TranslatorAgents.ONLINE -> {
-                GoogleTranslateOnline.onlineTranslate(textList, from, to, progress)
+                try { GoogleTranslateOnline.onlineTranslate(textList, from, to, progress) } catch (e: Exception) { logError(e); offlineTranslate(textList, from, to, progress) }
             }
 
             TranslatorAgents.OFFLINE -> {
@@ -128,3 +128,4 @@ class TranslationManager {
         releaseOffline()
     }
 }
+
