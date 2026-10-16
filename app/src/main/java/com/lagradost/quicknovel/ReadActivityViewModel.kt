@@ -45,6 +45,7 @@ import java.net.URLDecoder
 import java.security.MessageDigest
 import java.util.Locale
 import java.util.concurrent.TimeoutException
+import com.lagradost.quicknovel.util.translation.models.TranslatorAgents
 
 class ReadActivityViewModel : APIRepository() {
     companion object {
