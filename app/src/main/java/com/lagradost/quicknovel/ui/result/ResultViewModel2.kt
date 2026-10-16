@@ -1,4 +1,4 @@
-package com.lagradost.quicknovel.ui.result
+﻿package com.lagradost.quicknovel.ui.result
 
 import android.os.Bundle
 import androidx.compose.runtime.Immutable
@@ -169,7 +169,7 @@ class ResultViewModel2(
     init {
         viewModelScope.launch {
             api.loadResult(url).onFailure { error ->
-                updateState { copy(responseError = error, loadingResponse = false) }
+                updateState { if (response != null) copy(loadingResponse = false, responseError = null) else copy(responseError = error, loadingResponse = false) }
             }.onSuccess { value ->
                 val id = value.id ?: throw IllegalStateException("loadResult must give an id")
                 val bookmarkState = getBookmarkState(id)
